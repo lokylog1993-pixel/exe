@@ -1,11 +1,14 @@
 
-#define AppName "BitD GM AI"
+##define AppName "BitD GM AI"
 #ifndef AppVersion
   #define AppVersion "1.0.0"
 #endif
-#define SourceDir "dist\BitD_GM_AI"
-#define OutputDir "dist\installer"
-
+##ifndef SourceDir
+  #define SourceDir "dist\BitD GM AI"
+#endif
+#ifndef OutputDir
+  #define OutputDir "dist\installer"
+#endif
 [Setup]
 AppName={#AppName}
 AppVersion={#AppVersion}
