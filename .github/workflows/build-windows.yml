@@ -1,29 +1,19 @@
 name: build-windows
 on:
-  workflow_dispatch:     # ← вернёт кнопку Run
+  workflow_dispatch:
   push:
-    branches: ["main"]   # можно оставить, чтобы сборка шла и по коммитам
-
+    branches: ["main"]
 
 jobs:
   build:
     runs-on: windows-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Show tree (sanity check)
-        shell: pwsh
-        run: |
-          git ls-files | Out-String | Write-Host
-          if (-not (Test-Path "run_app.py")) { Write-Error "run_app.py not found"; exit 2 }
-          if (-not (Test-Path "app\server.py")) { Write-Error "app\server.py not found"; exit 2 }
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
-          cache: 'pip'
+          python-version: "3.12"
+          cache: "pip"
 
       - name: Install deps
         shell: pwsh
@@ -31,7 +21,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt pyinstaller pywebview
 
-            - name: Build portable EXE (PyInstaller, robust)
+      - name: Build portable EXE (PyInstaller)
         shell: pwsh
         run: |
           pyinstaller --noconfirm --clean --log-level DEBUG `
@@ -51,14 +41,6 @@ jobs:
             --exclude-module webview.platforms.winforms `
             --exclude-module webview.platforms.mshtml `
             run_app.py
-
-
-      - name: Upload build logs (always)
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: build_logs
-          path: build\
 
       - name: Upload portable app
         uses: actions/upload-artifact@v4
@@ -81,3 +63,4 @@ jobs:
         with:
           name: BitD_GM_AI_Setup
           path: dist\installer\BitD_GM_AI_Setup.exe
+          
