@@ -32,15 +32,20 @@ jobs:
           pip install -r requirements.txt pyinstaller pywebview
 
       # Сборка БЕЗ .spec: один exe из run_app.py, с ресурсами папки app
-      - name: Build portable EXE (no-spec)
+            - name: Build portable EXE (PyInstaller, robust)
         shell: pwsh
         run: |
           pyinstaller --noconfirm --clean --log-level DEBUG `
             --name "BitD GM AI" `
             --noconsole `
-            --icon "packaging\bitd_gm_ai.ico" `
             --add-data "app;app" `
+            --collect-submodules webview `
+            --collect-submodules gradio `
+            --collect-submodules fastapi `
+            --collect-submodules starlette `
+            --collect-submodules pydantic `
             run_app.py
+
         # если упадёт — выложим всю директорию build
       - name: Upload build logs (always)
         if: always()
@@ -57,7 +62,6 @@ jobs:
           name: BitD_GM_AI_portable
           path: dist\BitD GM AI\
 
-      # Инсталлятор Inno Setup (используем собранную папку с пробелом в имени)
       - name: Install Inno Setup
         shell: pwsh
         run: choco install innosetup -y
@@ -73,3 +77,4 @@ jobs:
         with:
           name: BitD_GM_AI_Setup
           path: dist\installer\BitD_GM_AI_Setup.exe
+
