@@ -1,8 +1,9 @@
 name: build-windows
 on:
-  workflow_dispatch:       # вернёт кнопку Run
+  workflow_dispatch:     # ← вернёт кнопку Run
   push:
-    branches: ["main"]
+    branches: ["main"]   # можно оставить, чтобы сборка шла и по коммитам
+
 
 jobs:
   build:
