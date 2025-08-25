@@ -12,10 +12,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Show tree
+      - name: Show tree (sanity check)
+        shell: pwsh
         run: |
-          echo Files in repo:
-          git ls-files
+          git ls-files | Out-String | Write-Host
+          if (-not (Test-Path "run_app.py")) { Write-Error "run_app.py not found in repo"; exit 2 }
+          if (-not (Test-Path "app\server.py")) { Write-Error "app\server.py not found in repo"; exit 2 }
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -29,45 +31,45 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt pyinstaller pywebview
 
-      - name: Build portable EXE (PyInstaller)
+      # Сборка БЕЗ .spec: один exe из run_app.py, с ресурсами папки app
+      - name: Build portable EXE (no-spec)
         shell: pwsh
         run: |
-          pyinstaller packaging\bitd_gm_ai_win.spec --noconfirm --clean --log-level DEBUG *>& build_pyinstaller.log
-
-      - name: Upload PyInstaller log (always)
+          pyinstaller --noconfirm --clean --log-level DEBUG `
+            --name "BitD GM AI" `
+            --noconsole `
+            --icon "packaging\bitd_gm_ai.ico" `
+            --add-data "app;app" `
+            run_app.py
+        # если упадёт — выложим всю директорию build
+      - name: Upload build logs (always)
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: build_logs
           path: |
-            build_pyinstaller.log
-            **/warn-*.txt
+            build\
+            *.log
 
+      - name: Upload portable app
+        uses: actions/upload-artifact@v4
+        with:
+          name: BitD_GM_AI_portable
+          path: dist\BitD GM AI\
+
+      # Инсталлятор Inno Setup (используем собранную папку с пробелом в имени)
       - name: Install Inno Setup
         shell: pwsh
         run: choco install innosetup -y
 
-      - name: Build installer (Inno Setup)
+      - name: Build installer
         shell: pwsh
         run: |
           $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
-          & "$iscc" packaging\installer.iss /DAppVersion=${{ github.run_number }}
+          & "$iscc" packaging\installer.iss /DAppVersion=${{ github.run_number }} /DSourceDir="dist\BitD GM AI" /DOutputDir="dist\installer"
 
       - name: Upload installer
         uses: actions/upload-artifact@v4
         with:
           name: BitD_GM_AI_Setup
           path: dist\installer\BitD_GM_AI_Setup.exe
-
-      - name: Upload portable app
-        uses: actions/upload-artifact@v4
-        with:
-          name: BitD_GM_AI_portable
-          path: dist\BitD_GM_AI\
-
-      - name: Upload dist (always, for diagnostics)
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: dist_raw
-          path: dist\
