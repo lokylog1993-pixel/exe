@@ -30,19 +30,27 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt pyinstaller pywebview
 
-      - name: Build portable EXE (PyInstaller)
+            - name: Build portable EXE (PyInstaller, robust)
         shell: pwsh
         run: |
           pyinstaller --noconfirm --clean --log-level DEBUG `
             --name "BitD GM AI" `
             --noconsole `
             --add-data "app;app" `
+            --hidden-import webview.platforms.edgechromium `
             --collect-submodules webview `
             --collect-submodules gradio `
             --collect-submodules fastapi `
             --collect-submodules starlette `
             --collect-submodules pydantic `
+            --exclude-module webview.platforms.gtk `
+            --exclude-module webview.platforms.qt `
+            --exclude-module webview.platforms.cocoa `
+            --exclude-module webview.platforms.cef `
+            --exclude-module webview.platforms.winforms `
+            --exclude-module webview.platforms.mshtml `
             run_app.py
+
 
       - name: Upload build logs (always)
         if: always()
