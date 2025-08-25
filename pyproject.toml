@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bitd-gm-ai"
+version = "0.2.0"
+description = "Локальный ИИ-Мастер для 'Клинки во Тьме' (Blades in the Dark)."
+authors = [{name="Your Name"}]
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi>=0.111",
+    "uvicorn>=0.30",
+    "pydantic>=2.8",
+    "llama-cpp-python>=0.2.76",
+    "openai>=1.40",
+    "tiktoken>=0.7",
+    "rich>=13.7",
+    "typer>=0.12",
+    "gradio>=4.44",
+    "python-dotenv>=1.0"
+]
+
+[project.scripts]
+bitd-gm = "app.cli:app"

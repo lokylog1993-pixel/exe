@@ -1,0 +1,12 @@
+fastapi>=0.111
+uvicorn>=0.30
+pydantic>=2.8
+llama-cpp-python>=0.2.76
+openai>=1.40
+tiktoken>=0.7
+rich>=13.7
+typer>=0.12
+gradio>=4.44
+python-dotenv>=1.0
+
+pywebview>=4.4
