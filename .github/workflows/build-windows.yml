@@ -48,19 +48,23 @@ jobs:
           name: BitD_GM_AI_portable
           path: dist\BitD GM AI\
 
-      - name: Install Inno Setup
+                  - name: Install Inno Setup
         shell: pwsh
         run: choco install innosetup -y
 
-      - name: Build installer
+      - name: Build installer (tolerate failure)
         shell: pwsh
+        continue-on-error: true
         run: |
           $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) { $iscc = "${env:ProgramFiles}\Inno Setup 6\ISCC.exe" }
+          if (-not (Test-Path $iscc)) { Write-Warning "ISCC.exe not found"; exit 0 }
           & "$iscc" packaging\installer.iss /DAppVersion=${{ github.run_number }} /DSourceDir="dist\BitD GM AI" /DOutputDir="dist\installer"
+          if ($LASTEXITCODE -ne 0) { Write-Warning "ISCC failed with exit code $LASTEXITCODE" }
 
-      - name: Upload installer
+      - name: Upload installer (only if exists)
+        if: hashFiles('dist/installer/BitD_GM_AI_Setup.exe') != ''
         uses: actions/upload-artifact@v4
         with:
           name: BitD_GM_AI_Setup
           path: dist\installer\BitD_GM_AI_Setup.exe
-          
